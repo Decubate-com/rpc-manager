@@ -47,11 +47,13 @@ export interface RpcManagerConfig {
   rotateIntervalMins: number;
 }
 
+export interface NewRpcEvent {
+  bestUrl: string;
+  oldProvider: AutoGasJsonRpcProvider;
+}
+
 export class RpcManager {
-  public NewRpcUrl = new Utils.Evt<{
-    bestUrl: string;
-    oldProvider: AutoGasJsonRpcProvider;
-  }>();
+  public NewRpcUrl = new Utils.Evt<NewRpcEvent>();
 
   public rotateProvider: () => Promise<void>;
 
