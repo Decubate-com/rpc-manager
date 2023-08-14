@@ -48,7 +48,10 @@ export interface RpcManagerConfig {
 }
 
 export class RpcManager {
-  public NewRpcUrl = new Utils.Evt<string>();
+  public NewRpcUrl = new Utils.Evt<{
+    bestUrl: string;
+    oldProvider: AutoGasJsonRpcProvider;
+  }>();
 
   public rotateProvider: () => Promise<void>;
 
@@ -118,9 +121,10 @@ export class RpcManager {
     const bestUrl = await RpcManager.getBestRpcUrl(this._config.chainId);
 
     if (bestUrl !== this.provider.connection.url) {
+      const oldProvider = this.provider;
       this.provider = new AutoGasJsonRpcProvider(bestUrl);
 
-      this.NewRpcUrl.trigger(bestUrl);
+      this.NewRpcUrl.trigger({ bestUrl, oldProvider });
     }
   }
 }
