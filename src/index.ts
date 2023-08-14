@@ -25,7 +25,9 @@ export class AutoGasJsonRpcProvider extends JsonRpcProvider {
       transaction.gasPrice = gasInfo.gasPrice;
     }
 
-    return this.sendTransaction(wallet.signTransaction(transaction));
+    const signedTx = await wallet.signTransaction(transaction);
+
+    return this.sendTransaction(signedTx);
   }
 
   async getGasInfo() {
