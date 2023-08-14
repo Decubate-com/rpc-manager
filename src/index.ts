@@ -22,7 +22,6 @@ export class AutoGasJsonRpcProvider extends JsonRpcProvider {
     ]);
 
     transaction.nonce = nonce;
-    transaction.from = wallet.address;
 
     if (gasInfo.maxFeePerGas && gasInfo.maxPriorityFeePerGas) {
       transaction.maxFeePerGas = gasInfo.maxFeePerGas;
@@ -31,7 +30,7 @@ export class AutoGasJsonRpcProvider extends JsonRpcProvider {
       transaction.gasPrice = gasInfo.gasPrice;
     }
 
-    transaction.gasLimit = await wallet.estimateGas(transaction);
+    transaction.gasLimit = await this.estimateGas(transaction);
 
     const signedTx = await wallet.signTransaction(transaction);
 
