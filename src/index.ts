@@ -16,12 +16,14 @@ export class AutoGasJsonRpcProvider extends JsonRpcProvider {
     transaction: TransactionRequest,
     wallet: Wallet
   ): Promise<TransactionResponse> {
-    const [gasInfo, nonce] = await Promise.all([
+    const [gasInfo, nonce, network] = await Promise.all([
       this.getGasInfo(),
       this.getTransactionCount(wallet.address, "pending"),
+      this.getNetwork(),
     ]);
 
     transaction.nonce = nonce;
+    transaction.chainId = network.chainId;
 
     if (gasInfo.maxFeePerGas && gasInfo.maxPriorityFeePerGas) {
       transaction.maxFeePerGas = gasInfo.maxFeePerGas;
