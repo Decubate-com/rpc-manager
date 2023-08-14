@@ -1,10 +1,45 @@
-import { JsonRpcProvider } from "@ethersproject/providers";
+import {
+  JsonRpcProvider,
+  JsonRpcSigner,
+  TransactionRequest,
+  TransactionResponse,
+} from "@ethersproject/providers";
 import axios from "axios";
 
 import * as Utils from "./utils";
 import rpcList from "./rpc.json";
 
 const chainList: Record<string, string[]> = rpcList;
+
+export class AutoGasJsonRpcProvider extends JsonRpcProvider {
+  async sendAutoGasTransaction(
+    transaction: TransactionRequest,
+    signer: JsonRpcSigner
+  ): Promise<TransactionResponse> {
+    const gasInfo = await this.getGasInfo();
+
+    if (gasInfo.maxFeePerGas && gasInfo.maxPriorityFeePerGas) {
+      transaction.maxFeePerGas = gasInfo.maxFeePerGas;
+      transaction.maxPriorityFeePerGas = gasInfo.maxPriorityFeePerGas;
+    } else if (gasInfo.gasPrice) {
+      transaction.gasPrice = gasInfo.gasPrice;
+    }
+
+    return this.sendTransaction(signer.signTransaction(transaction));
+  }
+
+  async getGasInfo() {
+    const feeData = await this.getFeeData();
+
+    const gas = {
+      gasPrice: feeData.gasPrice,
+      maxFeePerGas: feeData.maxFeePerGas,
+      maxPriorityFeePerGas: feeData.maxFeePerGas,
+    };
+
+    return gas;
+  }
+}
 
 export interface RpcManagerConfig {
   chainId: number;
@@ -18,7 +53,7 @@ export class RpcManager {
   public rotateProvider: () => Promise<void>;
 
   constructor(
-    public provider: JsonRpcProvider,
+    public provider: AutoGasJsonRpcProvider,
     private _config: RpcManagerConfig
   ) {
     this.rotateProvider = this._rotateProvider.bind(this);
@@ -75,7 +110,7 @@ export class RpcManager {
     };
 
     const bestUrl = await this.getBestRpcUrl(chainId);
-    const provider = new JsonRpcProvider(bestUrl);
+    const provider = new AutoGasJsonRpcProvider(bestUrl);
     return new RpcManager(provider, config);
   }
 
@@ -83,7 +118,7 @@ export class RpcManager {
     const bestUrl = await RpcManager.getBestRpcUrl(this._config.chainId);
 
     if (bestUrl !== this.provider.connection.url) {
-      this.provider = new JsonRpcProvider(bestUrl);
+      this.provider = new AutoGasJsonRpcProvider(bestUrl);
 
       this.NewRpcUrl.trigger(bestUrl);
     }
