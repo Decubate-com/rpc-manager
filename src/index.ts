@@ -1,9 +1,9 @@
 import {
   JsonRpcProvider,
-  JsonRpcSigner,
   TransactionRequest,
   TransactionResponse,
 } from "@ethersproject/providers";
+import { Wallet } from "@ethersproject/wallet";
 import axios from "axios";
 
 import * as Utils from "./utils";
@@ -14,7 +14,7 @@ const chainList: Record<string, string[]> = rpcList;
 export class AutoGasJsonRpcProvider extends JsonRpcProvider {
   async sendAutoGasTransaction(
     transaction: TransactionRequest,
-    signer: JsonRpcSigner
+    wallet: Wallet
   ): Promise<TransactionResponse> {
     const gasInfo = await this.getGasInfo();
 
@@ -25,7 +25,7 @@ export class AutoGasJsonRpcProvider extends JsonRpcProvider {
       transaction.gasPrice = gasInfo.gasPrice;
     }
 
-    return this.sendTransaction(signer.signTransaction(transaction));
+    return this.sendTransaction(wallet.signTransaction(transaction));
   }
 
   async getGasInfo() {
