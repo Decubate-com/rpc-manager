@@ -28,6 +28,7 @@ export class AutoGasJsonRpcProvider extends JsonRpcProvider {
     if (gasInfo.maxFeePerGas && gasInfo.maxPriorityFeePerGas) {
       transaction.maxFeePerGas = gasInfo.maxFeePerGas;
       transaction.maxPriorityFeePerGas = gasInfo.maxPriorityFeePerGas;
+      transaction.type = 2;
     } else if (gasInfo.gasPrice) {
       transaction.gasPrice = gasInfo.gasPrice;
     }
