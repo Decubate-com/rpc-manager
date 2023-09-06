@@ -24,15 +24,15 @@ export class AutoGasJsonRpcProvider extends JsonRpcProvider {
 
     transaction.nonce = nonce;
     transaction.chainId = network.chainId;
+    transaction.from = wallet.address;
 
-    if (gasInfo.maxFeePerGas && gasInfo.maxPriorityFeePerGas) {
+    if (gasInfo.gasPrice) {
+      transaction.gasPrice = gasInfo.gasPrice;
+    } else if (gasInfo.maxFeePerGas && gasInfo.maxPriorityFeePerGas) {
       transaction.maxFeePerGas = gasInfo.maxFeePerGas;
       transaction.maxPriorityFeePerGas = gasInfo.maxPriorityFeePerGas;
       transaction.type = 2;
-    } else if (gasInfo.gasPrice) {
-      transaction.gasPrice = gasInfo.gasPrice;
     }
-
     transaction.gasLimit = await this.estimateGas(transaction);
 
     const signedTx = await wallet.signTransaction(transaction);
@@ -98,7 +98,8 @@ export class RpcManager {
               }),
             Utils.timeout(3000),
           ]);
-        } catch {
+        } catch (err: any) {
+          console.log(err.message, url);
           working = false;
         }
 
@@ -109,6 +110,8 @@ export class RpcManager {
     const valid_providers = checked_providers
       .filter(({ working }) => working)
       .sort((a, b) => a.time - b.time);
+
+    console.log("FOUND VALID:", valid_providers.length);
 
     return valid_providers[0].url;
   }
@@ -142,3 +145,18 @@ export class RpcManager {
     }
   }
 }
+
+const main = async () => {
+  const rpcManager = await RpcManager.new({
+    chainId: 137,
+    rotateIntervalMins: 1,
+  });
+
+  setInterval(() => {
+    rpcManager.provider
+      .getBlockNumber()
+      .then((b) => console.log("CURRENT BLOCK:", b));
+  }, 3000);
+};
+
+main();
