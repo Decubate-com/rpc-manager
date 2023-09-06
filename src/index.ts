@@ -99,7 +99,6 @@ export class RpcManager {
             Utils.timeout(3000),
           ]);
         } catch (err: any) {
-          console.log(err.message, url);
           working = false;
         }
 
