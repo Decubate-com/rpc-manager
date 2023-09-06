@@ -111,8 +111,6 @@ export class RpcManager {
       .filter(({ working }) => working)
       .sort((a, b) => a.time - b.time);
 
-    console.log("FOUND VALID:", valid_providers.length);
-
     return valid_providers[0].url;
   }
 
@@ -145,18 +143,3 @@ export class RpcManager {
     }
   }
 }
-
-const main = async () => {
-  const rpcManager = await RpcManager.new({
-    chainId: 137,
-    rotateIntervalMins: 1,
-  });
-
-  setInterval(() => {
-    rpcManager.provider
-      .getBlockNumber()
-      .then((b) => console.log("CURRENT BLOCK:", b));
-  }, 3000);
-};
-
-main();
